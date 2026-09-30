@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Beginner Quiz App</title>
+  
+  <!-- CSS STYLES HERE -->
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #eef2f5;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .quiz-card {
+      background: #ffffff;
+      padding: 25px;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 90%;
+      max-width: 450px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+      color: #222;
+    }
+
+    #question {
+      font-size: 1.1rem;
+      margin-bottom: 15px;
+      color: #333;
+    }
+
+    .options-group {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    button {
+      background-color: #0066cc;
+      color: #ffffff;
+      border: none;
+      padding: 10px 16px;
+      font-size: 1rem;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background-color: #004999;
+    }
+
+    button.correct-choice {
+      background-color: #28a745 !important;
+    }
+
+    button.wrong-choice {
+      background-color: #dc3545 !important;
+    }
+
+    button:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    #next-btn, #restart-btn {
+      margin-top: 10px;
+      width: 100%;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="quiz-card">
+    <h1>Simple Quiz App</h1>
+    
+    <!-- Active Question Container -->
+    <div id="quiz-body">
+      <p id="question">Question text will load here</p>
+      <div id="answers" class="options-group">
+        <!-- Buttons added dynamically by JS -->
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <button id="next-btn" class="hidden">Next Question</button>
+
+    <!-- Score Summary Screen -->
+    <div id="results" class="hidden">
+      <h2>Quiz Finished!</h2>
+      <p id="final-score">Your score: 0</p>
+      <button id="restart-btn">Restart Quiz</button>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC HERE -->
+  <script>
+    const quizData = [
+      {
+        questionText: "What does HTML stand for?",
+        options: [
+          { text: "Hyper Text Markup Language", isCorrect: true },
+          { text: "High Text Machine Language", isCorrect: false },
+          { text: "Hyper Transfer Main Language", isCorrect: false }
+        ]
+      },
+      {
+        questionText: "Which technology styles web pages?",
+        options: [
+          { text: "HTML", isCorrect: false },
+          { text: "CSS", isCorrect: true },
+          { text: "JavaScript", isCorrect: false }
+        ]
+      }
+    ];
+
+    const questionElement = document.getElementById("question");
+    const optionsElement = document.getElementById("answers");
+    const nextButton = document.getElementById("next-btn");
+    const quizBody = document.getElementById("quiz-body");
+    const resultsContainer = document.getElementById("results");
+    const scoreDisplay = document.getElementById("final-score");
+    const restartButton = document.getElementById("restart-btn");
+
+    let activeIndex = 0;
+    let userScore = 0;
+
+    function initQuiz() {
+      activeIndex = 0;
+      userScore = 0;
+      resultsContainer.classList.add("hidden");
+      quizBody.classList.remove("hidden");
+      nextButton.classList.add("hidden");
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      clearOptions();
+      const current = quizData[activeIndex];
+      questionElement.textContent = `${activeIndex + 1}. ${current.questionText}`;
+
+      current.options.forEach(opt => {
+        const btn = document.createElement("button");
+        btn.textContent = opt.text;
+        btn.dataset.correct = opt.isCorrect;
+        btn.addEventListener("click", handleSelection);
+        optionsElement.appendChild(btn);
+      });
+    }
+
+    function clearOptions() {
+      nextButton.classList.add("hidden");
+      while (optionsElement.firstChild) {
+        optionsElement.removeChild(optionsElement.firstChild);
+      }
+    }
+
+    function handleSelection(event) {
+      const chosenBtn = event.target;
+      const correct = chosenBtn.dataset.correct === "true";
+
+      if (correct) {
+        chosenBtn.classList.add("correct-choice");
+        userScore++;
+      } else {
+        chosenBtn.classList.add("wrong-choice");
+      }
+
+      Array.from(optionsElement.children).forEach(btn => {
+        if (btn.dataset.correct === "true") {
+          btn.classList.add("correct-choice");
+        }
+        btn.disabled = true;
+      });
+
+      nextButton.classList.remove("hidden");
+    }
+
+    nextButton.addEventListener("click", () => {
+      activeIndex++;
+      if (activeIndex < quizData.length) {
+        renderQuestion();
+      } else {
+        displayResults();
+      }
+    });
+
+    function displayResults() {
+      quizBody.classList.add("hidden");
+      nextButton.classList.add("hidden");
+      resultsContainer.classList.remove("hidden");
+      scoreDisplay.textContent = `You scored ${userScore} out of ${quizData.length}!`;
+    }
+
+    restartButton.addEventListener("click", initQuiz);
+
+    initQuiz();
+  </script>
+</body>
+</html>
